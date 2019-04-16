@@ -1,7 +1,50 @@
-/**
- * Implement Gatsby's Node APIs in this file.
- *
- * See: https://www.gatsbyjs.org/docs/node-apis/
- */
+const axios = require('axios');
+const get = endpoint => axios.get(`https://pokeapi.co/api/v2${endpoint}`);
 
-// You can delete this file if you're not using it
+const getPokemonData = names =>
+  Promise.all(
+    names.map(async name => {
+      //axiops.get obtener el poke por el nombre
+      const { data: pokemon } = await get(`/pokemon/${name}`);
+
+      //axiops.get obtener la data de las habilidades del pokemon 
+      const abilities = await Promise.all(
+        pokemon.abilities.map(async ({ ability: { name: abilityName } }) => {
+          const { data: ability } = await get(`/ability/${abilityName}`);
+
+          return ability;
+        })
+      );
+        // ... operador de propagación -- pasar objetos como paramentros? o concatenar arrays
+      return { ...pokemon, abilities };
+    })
+  );
+
+exports.createPages = async ({ actions: { createPage } }) => {
+  const allPokemon = await getPokemonData(['pikachu', 'charizard', 'squirtle', 'kabuto','ditto']);
+
+  // Create a page that lists all Pokémon.
+  createPage({
+    path: `/pokemon/`,
+    component: require.resolve('./src/templates/all-pokemon.js'),
+    context: { allPokemon }
+  });
+
+  // Create a page for each Pokémon.
+  allPokemon.forEach(pokemon => {
+    createPage({
+      path: `/pokemon/${pokemon.name}/`,
+      component: require.resolve('./src/templates/pokemon.js'),
+      context: { pokemon }
+    });
+
+    // Create a page for each ability of the current Pokémon.
+    pokemon.abilities.forEach(ability => {
+      createPage({
+        path: `/pokemon/${pokemon.name}/ability/${ability.name}/`,
+        component: require.resolve('./src/templates/ability.js'),
+        context: { pokemon, ability }
+      });
+    });
+  });
+};
