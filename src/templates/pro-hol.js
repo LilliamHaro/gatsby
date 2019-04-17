@@ -59,29 +59,25 @@ import {Link} from 'gatsby'
 
 const DashboardPage = props => {
   const {pageContext} = props
-  const {allMessages} = pageContext
+  const {productosHol} = pageContext
   return (
     <Layout>
       <SEO title="Dashboard" keywords={[`gatsby`, `application`, `react`]} />
       <h1>Dashboard</h1>
       <p>Welcome to your new Gatsby site.</p>
-    {console.log(pageContext.allMessages)}
+
     <ul>
-      {
-        pageContext.allMessages.map( (mess,i) => (
-          <li key={i}>{mess.name}
+     {
+      pageContext.productosHol.map( (prod,i) => (
+        <li key={i}>{prod.name}
 
-            <Link to={`/pokemon/${mess.id}`}>
-                <p>{mess.name}</p>
-              </Link>
-          </li>
-        ))
-      }
+          <br/>
+    
+        </li>
+        
+      ))
+     }
 
-      <br/>
-      <Link to={`/pokemon/zona-holistica`}>
-                <p>zona holistica</p>
-              </Link>
     </ul>
     </Layout>
   )
